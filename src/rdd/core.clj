@@ -2,8 +2,13 @@
   (:require [hickory.core :refer [parse as-hickory]]
             [hickory.select :as hs]
             [aleph.http :as aleph]
+            [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.json :refer [wrap-json-response]]
-            [ring.util.response :refer [response]]))
+            [ring.util.response :refer [response]]
+            [compojure.core :refer [defroutes GET]]
+            [compojure.route :as route]
+            [hiccup.page :refer [html5]]
+            [hiccup.form :refer [form-to]]))
 
 (defn extract-nested-value [record-list]
   (-> record-list
@@ -31,30 +36,53 @@
 (defn fetch []
   (slurp "https://gist.github.com/statguy/6489c06f2425c8836f2243ff01542c6b"))
 
+;; Domain model
 
 (defonce D (atom nil))
 
 (defn init-data []
   (reset! D (peeps (fetch))))
 
+;; Web layer
+
+(defn page []
+  (html5
+    [:body
+     [:div#app "Blank"]
+     [:script {:src "/js/main.js"}]
+     [:script "rdd.client.core.start();"]]))
+
+(defroutes approutes
+  (GET "/" [] (page))
+  (GET "/api" [] (response @D))
+  (GET "/favicon.ico" [] ""))
+
 (def handler
-  (wrap-json-response
-    (fn [{:keys [uri]}]
-      (case (#{"/" "/api"} uri)
-        "/api" (response @D)
-        "/" (response "<html><body><h1>HELLO</h1></body></html>")
-        (response "nothing")))))
+  (-> approutes
+      (wrap-json-response)
+      (wrap-resource "public")))
+
+;; Web server
 
 (defonce S (atom nil))
 
-(defn start! []
+(defn start-server! []
   (init-data)
   (reset! S (aleph/start-server handler {:port 8000})))
 
-(defn stop! []
+(defn stop-server! []
   (when-let [s @S] (.close s))
   (reset! S nil))
 
+(defn restart-server! []
+  (stop-server!)
+  (start-server!))
+
+;; System
+
 (defn restart! []
-  (stop!)
-  (start!))
+  (init-data)
+  (restart-server!))
+
+(defn -main []
+  (restart!))
