@@ -1,6 +1,6 @@
 (ns rdd.core-test
   (:require [clojure.test :refer :all]
-            [rdd.core :refer [chiang-mai-peeps]]))
+            [rdd.core :refer [peeps]]))
 
 (deftest chiang-mai-peeps-test
   (let [input (str "<html><body><table><tr></tr><tr>"
@@ -22,4 +22,4 @@
                  :location "Chiang Mai, Thailand",
                  :picture "https://avatars1.githubusercontent.com/u/1292803?v=3&s=400",
                  :hireable "Yes"}]]
-    (is (= (chiang-mai-peeps input) output))))
+    (is (= (peeps input) output))))
