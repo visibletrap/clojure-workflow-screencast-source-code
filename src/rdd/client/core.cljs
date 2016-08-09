@@ -1,11 +1,29 @@
 (ns rdd.client.core
   (:require [reagent.core :as r]))
 
-(defn root []
-  [:h1 "Hello World"])
+(enable-console-print!)
 
-(defn ^:export start []
-  #_(r/render-component [root] (.getElementById js/document "app")))
+(defonce S (r/atom ""))
+
+(defn label [text]
+  [:h1 text])
+
+(defn root []
+  (let [text @S]
+    [:div
+     [:input {:type :text
+              :value text
+              :placeholder "Type here"
+              :on-change (fn [e] (reset! S (.. e -target -value)))}]
+     [label text]
+     [label "FIX TEXT"]]))
+
+(defn mount-root []
+  (r/render-component [root] (.getElementById js/document "app")))
 
 (defn on-js-reload []
-  (start))
+  (mount-root))
+
+(defn ^:export start []
+  ; Call api through ajax and store retrived data
+  (mount-root))

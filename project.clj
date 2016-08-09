@@ -7,7 +7,8 @@
                  [aleph "0.4.1"]
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
-                 [reagent "0.6.0-rc"]]
+                 [reagent "0.6.0-rc"]
+                 [cljs-ajax "0.5.8"]]
 
   :plugins [[lein-figwheel "0.5.4-7"]
             [lein-cljsbuild "1.1.3"]]
