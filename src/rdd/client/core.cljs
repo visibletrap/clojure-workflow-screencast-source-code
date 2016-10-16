@@ -1,11 +1,12 @@
 (ns rdd.client.core
   (:require [reagent.core :as r]
-            [ajax.core :refer [GET]]))
+            [ajax.core :refer [GET POST]]))
 
 (enable-console-print!)
 
 (defonce S (r/atom {:search ""
-                    :records []}))
+                    :records []
+                    :saving false}))
 
 (defn label [text]
   [:h1 text])
@@ -34,13 +35,24 @@
   (fn [r] (re-find (re-pattern search) (:username r))))
 
 (defn root []
-  (let [{:keys [search records]} @S
+  (let [{:keys [search records saving]} @S
         filtered-records (filter (match-record search) records)]
     [:div
      [:input {:type :text
               :value search
               :placeholder "Type here"
               :on-change (fn [e] (swap! S assoc :search (.. e -target -value)))}]
+     [:input {:type :button
+              :value (if saving "Saving" "Save")
+              :on-click (fn [_]
+                          (swap! S assoc :saving true)
+                          (POST
+                            "/save"
+                            {:format :json
+                             :params {:search search}
+                             :handler (fn [_] (swap! S assoc :saving false))
+                             :error-handler #()}))
+              :disabled saving}]
      [label search]
      [records-table filtered-records]]))
 
@@ -51,7 +63,8 @@
   (mount-root))
 
 (defn ^:export start []
-  (GET "/api" {:handler (fn [resp] (swap! S assoc :records resp))
+  (GET "/api" {:handler (fn [{:keys [search peeps]}]
+                          (swap! S assoc :records peeps :search search))
                :response-format :json
                :keywords? true})
   (mount-root))

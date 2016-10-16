@@ -2,10 +2,11 @@
   (:require [hickory.core :refer [parse as-hickory]]
             [hickory.select :as hs]
             [aleph.http :as aleph]
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.resource :refer [wrap-resource]]
-            [ring.middleware.json :refer [wrap-json-response]]
+            [ring.middleware.json :refer [wrap-json-response wrap-json-params]]
             [ring.util.response :refer [response]]
-            [compojure.core :refer [defroutes GET]]
+            [compojure.core :refer [defroutes GET POST]]
             [hiccup.page :refer [html5]]
             [hiccup.form :refer [form-to]]))
 
@@ -40,7 +41,8 @@
 (defonce D (atom nil))
 
 (defn init-data []
-  (reset! D (peeps (fetch))))
+  (reset! D {:peeps (peeps (fetch))
+             :search ""}))
 
 ;; Web layer
 
@@ -54,10 +56,15 @@
 (defroutes approutes
   (GET "/" [] (page))
   (GET "/api" [] (response @D))
+  (POST "/save" [search]
+    (swap! D assoc :search search)
+    (response "Saved"))
   (GET "/favicon.ico" [] ""))
 
 (def handler
   (-> approutes
+      (wrap-keyword-params)
+      (wrap-json-params)
       (wrap-json-response)
       (wrap-resource "public")))
 
