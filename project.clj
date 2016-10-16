@@ -10,7 +10,7 @@
                  [reagent "0.6.0-rc"]
                  [cljs-ajax "0.5.8"]]
 
-  :plugins [[lein-figwheel "0.5.4-7"]
+  :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.3"]]
 
   :clean-targets ^{:protect false} ["resources/public/js" "target"]
