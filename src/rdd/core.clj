@@ -84,3 +84,7 @@
 
 (defn -main []
   (restart!))
+
+(comment
+  (restart-server!)
+  (restart!))
