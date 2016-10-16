@@ -6,7 +6,6 @@
             [ring.middleware.json :refer [wrap-json-response]]
             [ring.util.response :refer [response]]
             [compojure.core :refer [defroutes GET]]
-            [compojure.route :as route]
             [hiccup.page :refer [html5]]
             [hiccup.form :refer [form-to]]))
 
@@ -67,8 +66,7 @@
 (defonce S (atom nil))
 
 (defn start-server! []
-  (init-data)
-  (reset! S (aleph/start-server handler {:port 8000})))
+  (reset! S (aleph/start-server #'handler {:port 8000})))
 
 (defn stop-server! []
   (when-let [s @S] (.close s))
